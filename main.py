@@ -1,5 +1,12 @@
+import sys
+import string
+import os
+
 from opt.opt_parser import *
 from opt.opt_config import *
+
+from network.get_data import  *
+
 
 if __name__ == "__main__":
     parser = OptParser(get_opt_config())
@@ -18,3 +25,7 @@ if __name__ == "__main__":
     # mut_range = parsedOptions["mut_sigma"]
     # x_min = parsedOptions["x_min"]
     # x_max = parsedOptions["x_max"]
+
+    netmap = get_data('network/usa.xml')
+
+    print("OK")
