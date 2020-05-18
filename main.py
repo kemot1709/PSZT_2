@@ -7,6 +7,8 @@ from opt.opt_config import *
 
 from network.get_data import  *
 
+from visualize.occupancy import *
+
 
 if __name__ == "__main__":
     parser = OptParser(get_opt_config())
@@ -26,6 +28,11 @@ if __name__ == "__main__":
     # x_min = parsedOptions["x_min"]
     # x_max = parsedOptions["x_max"]
 
-    netmap = get_data('network/usa.xml')
+    nodemap, linklist, demandlist = get_data('network/usa.xml')
+
+    # Select demand
+    # D452
+
+    fig_occupancy = plot_occupancy(0, linklist)
 
     print("OK")
