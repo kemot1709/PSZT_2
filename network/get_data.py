@@ -50,7 +50,7 @@ def _get_NodeList(read_data):
             Nodeid = node.getAttribute("id")
             xCoordinates = node.getElementsByTagName('x')[0].childNodes[0].data
             yCoordinates = node.getElementsByTagName('y')[0].childNodes[0].data
-            nodemap[Nodeid] = Node(Nodeid, xCoordinates, yCoordinates)
+            nodemap[Nodeid] = Node(Nodeid, float(xCoordinates), float(yCoordinates))
 
     return nodemap
 
@@ -66,7 +66,7 @@ def _get_Linklist(read_data, nodemap):
             Destination = link.getElementsByTagName('target')[0].childNodes[0].data
             Capacity = link.getElementsByTagName('capacity')[0].childNodes[0].data
             Cost = link.getElementsByTagName('cost')[0].childNodes[0].data
-            linkobj = Link(Linkid, Source, Destination, Capacity, Cost)
+            linkobj = Link(Linkid, Source, Destination, int(float(Capacity)), int(float(Cost)))
             if Source in nodemap:
                 nodemap[Source].linklist.append(linkobj)
             else:
@@ -86,7 +86,7 @@ def _get_Demandlist(read_data, nodemap):
             Source = demand.getElementsByTagName('source')[0].childNodes[0].data
             Destination = demand.getElementsByTagName('target')[0].childNodes[0].data
             Demandval = demand.getElementsByTagName('demandValue')[0].childNodes[0].data
-            demandobj = Demand(Demandid, Source, Destination, Demandval)
+            demandobj = Demand(Demandid, Source, Destination, int(float(Demandval)))
             if Source in nodemap:
                 nodemap[Source].demandlist.append(demandobj)
             else:
