@@ -1,6 +1,9 @@
 import sys
 import string
 import os
+import datetime
+import time
+import math
 
 from opt.opt_parser import *
 from opt.opt_config import *
@@ -29,7 +32,7 @@ if __name__ == "__main__":
     # mut_range = parsedOptions["mut_sigma"]
     # x_min = parsedOptions["x_min"]
     # x_max = parsedOptions["x_max"]
-    generations = 10000
+    generations = 100
     demand_number = "D452"
 
     nodemap, linklist, demandlist = get_data('network/usa.xml')
@@ -42,7 +45,9 @@ if __name__ == "__main__":
 
     fig_occupancy = plot_occupancy(0, linklist)
     anthill = []
+    start = time.time()
     for i in range(generations):
+        print("\t", math.floor(i / generations * 100), "%", end="\r")
         # Create new ants
         for j in range(demand.demandValue):
             anthill.append(add_Ant(demand.source))
@@ -54,7 +59,10 @@ if __name__ == "__main__":
         # Sent ants to journey
         for ant in anthill:
             target = select_target(nodemap[get_actual_city(ant)])
-            move_Ant(ant, target)
+            if check_propriety_target(ant, target):
+                move_Ant(ant, target)
+            else:
+                anthill.remove(ant)
 
         # plot actual state of roads
         fig_occupancy = plot_occupancy(fig_occupancy, linklist)
@@ -62,8 +70,16 @@ if __name__ == "__main__":
         # Check for destination and update pheromone
         for ant in anthill:
             if get_actual_city(ant) == demand.destination:
-                # TODO update pheromone
-                # TODO delete ant
-                continue
+                update_pheromone(ant)
+                anthill.remove(ant)
 
-    print("OK")
+        # TODO zwietrz pheromone
+        for link in linklist:
+            linklist[link].pheromone = 0.9 * linklist[link].pheromone
+
+    stop = time.time()
+    print("\t", "100%", end='\r')
+
+    # TODO jakieś statystyki
+
+    print("Complete, calculation time: ", datetime.timedelta(seconds=(stop - start)))

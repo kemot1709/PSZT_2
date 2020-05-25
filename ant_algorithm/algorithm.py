@@ -5,11 +5,15 @@ import random
 
 
 def select_target(source):
-    probability = []
+    probability = {}
+    prob_sum = 0
     for link in source.linklist:
-        probability[link.uid] = link.pheromone + 1/link.cost
+        if link.occupancy < link.capacity:
+            probability[link.uid] = link.pheromone + 1 / link.cost
+            prob_sum += probability[link.uid]
+        else:
+            probability[link.uid] = 0
 
-    prob_sum = math.fsum(probability)
     rand = random.uniform(0, prob_sum)
 
     for link in source.linklist:
@@ -19,3 +23,8 @@ def select_target(source):
 
     print('Algorithm.py/select_target: no link probability')
     return link
+
+
+def update_pheromone(ant):
+    for link in ant.track:
+        ant.track[link].pheromone += 1 * ant.track[link].cost / ant.distance
