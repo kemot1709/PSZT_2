@@ -33,7 +33,7 @@ if __name__ == "__main__":
     # x_min = parsedOptions["x_min"]
     # x_max = parsedOptions["x_max"]
     generations = 100
-    demand_number = "D452"
+    demand_number = "D500"
 
     nodemap, linklist, demandlist = get_data('network/usa.xml')
 
@@ -43,7 +43,10 @@ if __name__ == "__main__":
 
     # Check if we can satisfy demand
 
-    fig_occupancy = plot_occupancy(0, linklist)
+    print("From ", demand.source, " to ", demand.destination, " with demand ", demand.demandValue)
+
+    # fig_occupancy = plot_occupancy(0, linklist)
+    map_occupancy = plot_map(0, nodemap, linklist)
     anthill = []
     start = time.time()
     for i in range(generations):
@@ -64,9 +67,6 @@ if __name__ == "__main__":
             else:
                 anthill.remove(ant)
 
-        # plot actual state of roads
-        fig_occupancy = plot_occupancy(fig_occupancy, linklist)
-
         # Check for destination and update pheromone
         for ant in anthill:
             if get_actual_city(ant) == demand.destination:
@@ -76,6 +76,10 @@ if __name__ == "__main__":
         # TODO zwietrz pheromone
         for link in linklist:
             linklist[link].pheromone = 0.9 * linklist[link].pheromone
+
+        # plot actual state of roads
+        # fig_occupancy = plot_occupancy(fig_occupancy, linklist)
+        map_occupancy = plot_map(map_occupancy, nodemap, linklist)
 
     stop = time.time()
     print("\t", "100%", end='\r')

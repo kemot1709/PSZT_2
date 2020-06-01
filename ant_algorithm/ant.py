@@ -5,7 +5,6 @@ from network.get_data import *
 
 class Ant:
     def __init__(self, actual_city):
-        # self.ID = ID
         self.distance = 0
         self.track = {}
         self.actual_city = actual_city
