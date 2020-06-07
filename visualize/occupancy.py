@@ -1,6 +1,5 @@
 import matplotlib
 import matplotlib.pyplot as plt
-import matplotlib.animation as animation
 
 from network.get_data import *
 
@@ -57,7 +56,7 @@ def plot_map(map_occupancy, city_list, linklist, title=""):
                 # TODO Czasami tu wchodzi choć nie powinien, bo ma ograniczenia wcześniej nałożone, trzeba to na którymś etapie naprawić
                 kolor = 1
             kolor = (1 - kolor, kolor, 0)
-        width = linklist[link].pheromone / 10
+        width = max(0.1, linklist[link].pheromone / 10)
         # width = linklist[link].pheromone
 
         plt.plot([city_list[linklist[link].source].x - 0.1, city_list[linklist[link].target].x + 0.1],

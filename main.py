@@ -15,6 +15,8 @@ from ant_algorithm.algorithm import *
 
 from visualize.occupancy import *
 
+# TODO Na przyszłość można zrobić licznik zabitych mrówek (tych co nie dotarły)
+
 if __name__ == "__main__":
     parser = OptParser(get_opt_config())
     parsedOptions = parser.parse(sys.argv[1:])
@@ -25,6 +27,7 @@ if __name__ == "__main__":
     pheromone_min = parsedOptions["ph_min"]
     pheromone_resistance = parsedOptions["ph_res"]
     demand_number = parsedOptions["demand"]
+    flag_delete = parsedOptions["elimination"]
 
     source = parsedOptions["source"]
     target = parsedOptions["target"]
@@ -40,9 +43,19 @@ if __name__ == "__main__":
         if source == '' or target == '':
             demand = random.choice(list(demandlist.values()))
         else:
-            # TODO
-            print("Not implemented")
-            demand = demandlist["D" + str(demand_number)]  # Rozwiązanie chwilowe
+            flag_s = 0
+            flag_t = 0
+            for city in nodemap:
+                if city == source:
+                    flag_s = 1
+
+                if city == target:
+                    flag_t = 1
+            if flag_s and flag_t:
+                demand = Demand("D___", source, target, requirement)
+            else:
+                print('Wrong city passed, taking random demand')
+                demand = random.choice(list(demandlist.values()))
 
     # Check if we can satisfy demand
     cap_source = 0
@@ -62,15 +75,18 @@ if __name__ == "__main__":
     for i in range(generations):
         print("\t", math.floor(i / generations * 100), "%", end="\r")
 
-        # # Delete best link
-        # if i % 200 == 0 and i > 0:
-        #     pom = 0
-        #     li = 0
-        #     for link in linklist:
-        #         if linklist[link].pheromone > pom:
-        #             pom = linklist[link].pheromone
-        #             li = link
-        #     del linklist[li]
+        # Delete best link and make algorithm interesting
+        if flag_delete:
+            if i % int(generations / 4) == 0 and i > 0:
+                pom = 0
+                li = 0
+                plt.figure(map_occupancy.number)
+                plt.show()
+                for link in linklist:
+                    if linklist[link].pheromone > pom:
+                        pom = linklist[link].pheromone
+                        li = link
+                del linklist[li]
 
         # Create new ants
         for j in range(demand.demandValue):
@@ -94,7 +110,7 @@ if __name__ == "__main__":
                 update_pheromone(ant)
                 anthill.remove(ant)
                 # TODO Czasami, w sumie nawet dość często mrówka nie jest zabijana lub wykrywana jak dojdzie do celu
-                # i nie potrafię tego namierzyć
+                # i nie potrafię tego namierzyć i wyeliminować
 
         for link in linklist:
             linklist[link].pheromone = pheromone_resistance * linklist[link].pheromone
@@ -107,6 +123,8 @@ if __name__ == "__main__":
     stop = time.time()
     print("\t", "100%", end='\r')
 
-    # TODO jakieś statystyki
+    # Summary
+    plt.figure(map_occupancy.number)
+    plt.show()
 
     print("Complete, calculation time: ", datetime.timedelta(seconds=(stop - start)))
