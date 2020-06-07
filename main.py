@@ -21,36 +21,57 @@ if __name__ == "__main__":
     print("Perform ant algorithm with given options:\n", parsedOptions)
 
     # Assign parsed options to variables
-    # function_type = FunctionType(parsedOptions["function"])
-    # selection_type = SelectionType(parsedOptions["sel_type"])
-    # replacement_type = ReplacementType(parsedOptions["rep_type"])
-    # crossover_probability = parsedOptions["crossover_p"]
-    # dimensions = parsedOptions["dimensions"]
-    # iterations = parsedOptions["iterations"]
-    # cardinality = parsedOptions["cardinality"]
-    # attempts = parsedOptions["attempts"]
-    # mut_range = parsedOptions["mut_sigma"]
-    # x_min = parsedOptions["x_min"]
-    # x_max = parsedOptions["x_max"]
-    generations = 100
-    demand_number = "D500"
+    generations = parsedOptions["generations"]
+    pheromone_min = parsedOptions["ph_min"]
+    pheromone_resistance = parsedOptions["ph_res"]
+    demand_number = parsedOptions["demand"]
 
+    source = parsedOptions["source"]
+    target = parsedOptions["target"]
+    requirement = parsedOptions["requirement"]
+
+    # Get data from file
     nodemap, linklist, demandlist = get_data('network/usa.xml')
 
     # Select demand
-    # D452
-    demand = demandlist[demand_number]
+    if demand_number >= 0:
+        demand = demandlist["D" + str(demand_number)]
+    else:
+        if source == '' or target == '':
+            demand = random.choice(list(demandlist.values()))
+        else:
+            # TODO
+            print("Not implemented")
+            demand = demandlist["D" + str(demand_number)]  # Rozwiązanie chwilowe
 
     # Check if we can satisfy demand
+    cap_source = 0
+    cap_target = 0
+    for link in nodemap[demand.source].linklist:
+        cap_source += link.capacity
+    for link in nodemap[demand.destination].linklist:
+        cap_target += link.capacity
+    demand.demandValue = min(demand.demandValue, cap_source, cap_target)
 
+    # Info about searched path
     print("From ", demand.source, " to ", demand.destination, " with demand ", demand.demandValue)
 
-    # fig_occupancy = plot_occupancy(0, linklist)
     map_occupancy = plot_map(0, nodemap, linklist)
     anthill = []
     start = time.time()
     for i in range(generations):
         print("\t", math.floor(i / generations * 100), "%", end="\r")
+
+        # # Delete best link
+        # if i % 200 == 0 and i > 0:
+        #     pom = 0
+        #     li = 0
+        #     for link in linklist:
+        #         if linklist[link].pheromone > pom:
+        #             pom = linklist[link].pheromone
+        #             li = link
+        #     del linklist[li]
+
         # Create new ants
         for j in range(demand.demandValue):
             anthill.append(add_Ant(demand.source))
@@ -72,13 +93,15 @@ if __name__ == "__main__":
             if get_actual_city(ant) == demand.destination:
                 update_pheromone(ant)
                 anthill.remove(ant)
+                # TODO Czasami, w sumie nawet dość często mrówka nie jest zabijana lub wykrywana jak dojdzie do celu
+                # i nie potrafię tego namierzyć
 
-        # TODO zwietrz pheromone
         for link in linklist:
-            linklist[link].pheromone = 0.9 * linklist[link].pheromone
+            linklist[link].pheromone = pheromone_resistance * linklist[link].pheromone
+            if linklist[link].pheromone < pheromone_min:
+                linklist[link].pheromone = pheromone_min
 
         # plot actual state of roads
-        # fig_occupancy = plot_occupancy(fig_occupancy, linklist)
         map_occupancy = plot_map(map_occupancy, nodemap, linklist)
 
     stop = time.time()

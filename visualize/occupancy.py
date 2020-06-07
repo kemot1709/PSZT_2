@@ -5,6 +5,7 @@ import matplotlib.animation as animation
 from network.get_data import *
 
 
+# Old and not developed!!!
 def plot_occupancy(fig_occupancy, linklist, title=""):
     if type(fig_occupancy) != matplotlib.figure.Figure:
         fig_occupancy = plt.figure(figsize=(19.8, 10.8), dpi=100)
@@ -30,9 +31,15 @@ def plot_occupancy(fig_occupancy, linklist, title=""):
 
 def plot_map(map_occupancy, city_list, linklist, title=""):
     if type(map_occupancy) != matplotlib.figure.Figure:
-        map_occupancy = plt.figure(figsize=(19.8, 10.8), dpi=100)
+        map_occupancy = plt.figure(1, figsize=(19.8, 10.8), dpi=100)
     else:
-        plt.figure(map_occupancy)
+        plt.figure(map_occupancy.number)
+        plt.clf()
+
+    # Get max of capacity
+    capacity = 0
+    for link in linklist:
+        capacity = max(capacity, linklist[link].capacity)
 
     # Plot points
     for city in city_list:
@@ -41,13 +48,24 @@ def plot_map(map_occupancy, city_list, linklist, title=""):
 
     # Plot links
     for link in linklist:
-        kolor = (linklist[link].occupancy / linklist[link].capacity)
-        kolor = (1 - kolor, kolor, 0)
+        if linklist[link].occupancy == 0:
+            kolor = (0, 0, 1)
+        else:
+            kolor = (linklist[link].occupancy / capacity)
+            if kolor > 1:
+                print(kolor, capacity, linklist[link].occupancy)
+                # TODO Czasami tu wchodzi choć nie powinien, bo ma ograniczenia wcześniej nałożone, trzeba to na którymś etapie naprawić
+                kolor = 1
+            kolor = (1 - kolor, kolor, 0)
         width = linklist[link].pheromone / 10
+        # width = linklist[link].pheromone
 
         plt.plot([city_list[linklist[link].source].x - 0.1, city_list[linklist[link].target].x + 0.1],
                  [city_list[linklist[link].source].y + 0.1, city_list[linklist[link].target].y - 0.1], color=kolor,
                  linewidth=width)
 
-    plt.suptitle(title)
-    plt.show()
+    plt.title(title)
+    plt.draw()
+    plt.pause(0.01)
+
+    return map_occupancy

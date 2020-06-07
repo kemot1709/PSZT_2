@@ -21,10 +21,20 @@ def select_target(source):
             return link
         rand -= probability[link.uid]
 
+    # TODO zabijać jak nie ma żadnego wyboru
+
     print('Algorithm.py/select_target: no link probability')
     return link
 
 
 def update_pheromone(ant):
+    # stara formuła
+    # for link in ant.track:
+    #     ant.track[link].pheromone += 1 * ant.track[link].cost / ant.distance
+
+    cities = 0
+    for i in ant.track:
+        cities += 1
+
     for link in ant.track:
-        ant.track[link].pheromone += 1 * ant.track[link].cost / ant.distance
+        ant.track[link].pheromone += 1 / cities

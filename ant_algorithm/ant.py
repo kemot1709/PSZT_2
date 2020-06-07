@@ -28,6 +28,6 @@ def get_actual_city(ant):
 
 def check_propriety_target(ant, link):
     for walked in ant.track:
-        if walked == link.uid:
+        if walked== link.uid:
             return 0
     return 1
