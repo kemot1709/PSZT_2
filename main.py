@@ -1,6 +1,3 @@
-import sys
-import string
-import os
 import datetime
 import time
 import math
@@ -15,7 +12,6 @@ from ant_algorithm.algorithm import *
 
 from visualize.occupancy import *
 
-# TODO Na przyszłość można zrobić licznik zabitych mrówek (tych co nie dotarły)
 
 if __name__ == "__main__":
     parser = OptParser(get_opt_config())
@@ -69,6 +65,7 @@ if __name__ == "__main__":
     # Info about searched path
     print("From ", demand.source, " to ", demand.destination, " with demand ", demand.demandValue)
 
+    # Start searching
     map_occupancy = plot_map(0, nodemap, linklist)
     anthill = []
     start = time.time()
@@ -78,15 +75,7 @@ if __name__ == "__main__":
         # Delete best link and make algorithm interesting
         if flag_delete:
             if i % int(generations / 4) == 0 and i > 0:
-                pom = 0
-                li = 0
-                plt.figure(map_occupancy.number)
-                plt.show()
-                for link in linklist:
-                    if linklist[link].pheromone > pom:
-                        pom = linklist[link].pheromone
-                        li = link
-                del linklist[li]
+                delete_best_option(linklist, map_occupancy)
 
         # Create new ants
         for j in range(demand.demandValue):
@@ -97,27 +86,15 @@ if __name__ == "__main__":
             linklist[link].occupancy = 0
 
         # Sent ants to journey
-        for ant in anthill:
-            target = select_target(nodemap[get_actual_city(ant)])
-            if check_propriety_target(ant, target):
-                move_Ant(ant, target)
-            else:
-                anthill.remove(ant)
+        send_ants(anthill, nodemap)
 
         # Check for destination and update pheromone
-        for ant in anthill:
-            if get_actual_city(ant) == demand.destination:
-                update_pheromone(ant)
-                anthill.remove(ant)
-                # TODO Czasami, w sumie nawet dość często mrówka nie jest zabijana lub wykrywana jak dojdzie do celu
-                # i nie potrafię tego namierzyć i wyeliminować
+        check_reaching_target(anthill, demand)
 
-        for link in linklist:
-            linklist[link].pheromone = pheromone_resistance * linklist[link].pheromone
-            if linklist[link].pheromone < pheromone_min:
-                linklist[link].pheromone = pheromone_min
+        # Update amount of pheromone on tracks
+        evaporate_pheromone(linklist, pheromone_resistance, pheromone_min)
 
-        # plot actual state of roads
+        # Plot actual state of roads
         map_occupancy = plot_map(map_occupancy, nodemap, linklist)
 
     stop = time.time()

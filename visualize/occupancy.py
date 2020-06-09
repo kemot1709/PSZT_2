@@ -53,11 +53,12 @@ def plot_map(map_occupancy, city_list, linklist, title=""):
             kolor = (linklist[link].occupancy / capacity)
             if kolor > 1:
                 print(kolor, capacity, linklist[link].occupancy)
-                # TODO Czasami tu wchodzi choć nie powinien, bo ma ograniczenia wcześniej nałożone, trzeba to na którymś etapie naprawić
+                # TODO Czasami tu wchodzi choć nie powinien, bo ma ograniczenia wcześniej nałożone, trzeba to na
+                #  którymś etapie naprawić
+                # UPDATE chyba jest już OK, ale nie jestem pewny
                 kolor = 1
             kolor = (1 - kolor, kolor, 0)
         width = max(0.1, linklist[link].pheromone / 10)
-        # width = linklist[link].pheromone
 
         plt.plot([city_list[linklist[link].source].x - 0.1, city_list[linklist[link].target].x + 0.1],
                  [city_list[linklist[link].source].y + 0.1, city_list[linklist[link].target].y - 0.1], color=kolor,
