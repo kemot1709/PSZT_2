@@ -104,4 +104,6 @@ if __name__ == "__main__":
     plt.figure(map_occupancy.number)
     plt.show()
 
+    # TODO jakaś rozsądna statystyka
+
     print("Complete, calculation time: ", datetime.timedelta(seconds=(stop - start)))
