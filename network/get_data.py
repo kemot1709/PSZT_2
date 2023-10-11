@@ -19,6 +19,8 @@ class Link:
         self.target = target
         self.capacity = capacity
         self.cost = cost
+        self.pheromone = 0
+        self.occupancy = 0
 
 
 class Demand:
@@ -28,20 +30,35 @@ class Demand:
         self.destination = destination
         self.demandValue = demandValue
 
-def get_data(name):
+
+def get_data(filename):
+    Read_Data = minidom.parse(filename)
+
+    nodemap = _get_NodeList(Read_Data)
+    linklist = _get_Linklist(Read_Data, nodemap)
+    demandlist = _get_Demandlist(Read_Data, nodemap)
+
+    return nodemap, linklist, demandlist
+
+
+def _get_NodeList(read_data):
     nodemap = {}
 
-    Read_Data = minidom.parse(name)
-    nodelist = Read_Data.getElementsByTagName("node")
+    nodelist = read_data.getElementsByTagName("node")
     for node in nodelist:
         if node.hasAttribute("id"):
             Nodeid = node.getAttribute("id")
             xCoordinates = node.getElementsByTagName('x')[0].childNodes[0].data
             yCoordinates = node.getElementsByTagName('y')[0].childNodes[0].data
-            nodemap[Nodeid] = Node(Nodeid, xCoordinates, yCoordinates)
-    del nodelist, node, Nodeid, xCoordinates, yCoordinates
+            nodemap[Nodeid] = Node(Nodeid, float(xCoordinates), float(yCoordinates))
 
-    linklist = Read_Data.getElementsByTagName("link")
+    return nodemap
+
+
+def _get_Linklist(read_data, nodemap):
+    links = {}
+
+    linklist = read_data.getElementsByTagName("link")
     for link in linklist:
         if link.hasAttribute("id"):
             Linkid = link.getAttribute("id")
@@ -49,27 +66,31 @@ def get_data(name):
             Destination = link.getElementsByTagName('target')[0].childNodes[0].data
             Capacity = link.getElementsByTagName('capacity')[0].childNodes[0].data
             Cost = link.getElementsByTagName('cost')[0].childNodes[0].data
-            linkobj = Link(Linkid, Source, Destination, Capacity, Cost)
+            linkobj = Link(Linkid, Source, Destination, int(float(Capacity)), int(float(Cost)))
             if Source in nodemap:
                 nodemap[Source].linklist.append(linkobj)
             else:
                 sys.exit('Link error!')
+            links[linkobj.uid] = linkobj
 
-    del linklist, link, Linkid, Source, Destination, Capacity, linkobj
+    return links
 
-    demandlist = Read_Data.getElementsByTagName("demand")
+
+def _get_Demandlist(read_data, nodemap):
+    demands = {}
+
+    demandlist = read_data.getElementsByTagName("demand")
     for demand in demandlist:
         if demand.hasAttribute("id"):
             Demandid = demand.getAttribute("id")
             Source = demand.getElementsByTagName('source')[0].childNodes[0].data
             Destination = demand.getElementsByTagName('target')[0].childNodes[0].data
             Demandval = demand.getElementsByTagName('demandValue')[0].childNodes[0].data
-            demandobj = Demand(Demandid, Source, Destination, Demandval)
+            demandobj = Demand(Demandid, Source, Destination, int(float(Demandval)))
             if Source in nodemap:
                 nodemap[Source].demandlist.append(demandobj)
             else:
                 sys.exit('Demand error!')
-    del demandlist, demand, Demandid, Source, Destination, Demandval, demandobj
-    del Read_Data
+            demands[demandobj.uid] = demandobj
 
-    return nodemap
+    return demands
